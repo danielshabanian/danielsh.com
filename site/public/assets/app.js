@@ -17,34 +17,41 @@ async function ensureRendered() {
 }
 
 /* ---------- theme: Auto / Light / Dark ---------- */
+// One button cycles system -> light -> dark; its icon shows the current choice.
+const THEMES = ["auto", "light", "dark"];
+const THEME_NAMES = { auto: "system", light: "light", dark: "dark" };
 function initTheme() {
-  const label = document.querySelector("[data-theme-label]");
-  const buttons = [...document.querySelectorAll("[data-theme-pick]")];
+  const btn = document.querySelector("[data-theme-toggle]");
   const read = () => {
     try { return localStorage.getItem("theme") || "auto"; } catch { return "auto"; }
   };
-  const apply = (choice) => {
-    if (choice === "auto") delete root.dataset.theme;
-    else root.dataset.theme = choice;
-    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themePick === choice)));
-    if (label) label.textContent = choice === "auto" ? "Theme follows your system" : `${choice[0].toUpperCase()}${choice.slice(1)} theme`;
+  let choice = read();
+  const apply = (next) => {
+    choice = next;
+    if (next === "auto") delete root.dataset.theme;
+    else root.dataset.theme = next;
+    root.dataset.themeChoice = next;
+    if (btn) {
+      const after = THEMES[(THEMES.indexOf(next) + 1) % THEMES.length];
+      const text = `Colour theme: ${THEME_NAMES[next]} (switch to ${THEME_NAMES[after]})`;
+      btn.setAttribute("aria-label", text);
+      btn.title = text;
+    }
   };
-  buttons.forEach((b) =>
-    b.addEventListener("click", () => {
-      const choice = b.dataset.themePick;
-      try { choice === "auto" ? localStorage.removeItem("theme") : localStorage.setItem("theme", choice); } catch {}
-      // Cross-fade the whole page between themes.
-      if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        document.startViewTransition(() => apply(choice));
-      } else apply(choice);
-    })
-  );
-  apply(read());
+  btn?.addEventListener("click", () => {
+    const next = THEMES[(THEMES.indexOf(choice) + 1) % THEMES.length];
+    try { next === "auto" ? localStorage.removeItem("theme") : localStorage.setItem("theme", next); } catch {}
+    // Cross-fade the whole page between themes.
+    if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.startViewTransition(() => apply(next));
+    } else apply(next);
+  });
+  apply(choice);
 }
 
 /* ---------- active nav link ---------- */
 function initNavSpy() {
-  const links = new Map([...document.querySelectorAll('.nav-links a[href^="#"]:not(.btn)')].map((a) => [a.getAttribute("href").slice(1), a]));
+  const links = new Map([...document.querySelectorAll('.nav-links a[href^="#"]')].map((a) => [a.getAttribute("href").slice(1), a]));
   const io = new IntersectionObserver(
     (entries) => entries.forEach((e) => e.isIntersecting && links.forEach((a, id) => a.classList.toggle("is-active", id === e.target.id))),
     { rootMargin: "-45% 0px -50% 0px" }
@@ -79,28 +86,27 @@ function initInstrument(gsap, intro, art, fine, ctx) {
   /* intro: rings draw, ticks fade, vertebrae stack top-down */
   intro.from(art, { opacity: 0, scale: 0.92, duration: 1.4 }, 0.2);
   if (window.DrawSVGPlugin) {
-    intro.from(art.querySelectorAll(".ring-inner, .ring-mid, .ring-outer circle"), { drawSVG: "50% 50%", duration: 1.6, stagger: 0.12, ease: "power3.inOut" }, 0.25)
+    intro.from(art.querySelectorAll(".ring-inner, .ring-outer circle"), { drawSVG: "50% 50%", duration: 1.6, stagger: 0.12, ease: "power3.inOut" }, 0.25)
       .from(art.querySelectorAll(".vert-body"), { drawSVG: "50% 50%", duration: 0.7, stagger: 0.06, ease: "power2.out" }, 0.6);
   }
-  intro.from(".instrument .ring-ticks, .instrument .cross", { opacity: 0, duration: 1 }, 0.5)
+  intro.from(".instrument .cross", { opacity: 0, duration: 1 }, 0.5)
     .from(art.querySelectorAll(".vert-part, .vert-disc"), { opacity: 0, duration: 0.5, stagger: 0.015 }, 0.9)
     .from(".instrument .sacrum", { opacity: 0, duration: 0.6 }, 1.3)
     .from(".instrument .hud", { x: -16, opacity: 0, duration: 0.8 }, 1.3);
 
   /* ambient: rings turn about the true centre */
   gsap.to(".instrument .ring-outer", { rotation: 360, svgOrigin: `${C} ${C}`, duration: 80, repeat: -1, ease: "none" });
-  gsap.to(".instrument .ring-ticks", { rotation: -360, svgOrigin: `${C} ${C}`, duration: 140, repeat: -1, ease: "none" });
   gsap.to(".instrument .orbit", { rotation: 360, svgOrigin: `${C} ${C}`, duration: 14, repeat: -1, ease: "none" });
 
   /* the loop */
   const loop = gsap.timeline({ repeat: -1, paused: true, defaults: { ease: "power3.inOut" } });
   const hit = (on) => verts.forEach((el, i) => el.classList.toggle("is-hit", on === i));
-  const scanPos = { y: 70 };
+  const scanPos = { y: 60 };
   loop
     .call(say(hudState, "SCANNING")).call(say(hudTarget, "—"))
     .set(scan, { opacity: 1 })
-    .fromTo(scanPos, { y: 70 }, {
-      y: 372, duration: 2.4, ease: "sine.inOut",
+    .fromTo(scanPos, { y: 60 }, {
+      y: 382, duration: 2.4, ease: "sine.inOut",
       onUpdate: () => {
         scan.setAttribute("transform", `translate(0 ${scanPos.y.toFixed(1)})`);
         const i = VERTEBRAE.findIndex((v) => Math.abs(v.y - scanPos.y) < 11);

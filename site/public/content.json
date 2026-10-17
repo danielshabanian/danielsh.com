@@ -1,11 +1,12 @@
-{
+﻿{
   "profile": {
     "name": "Danial Shabanian",
     "monogram": "ds",
     "location": "Nottingham, UK",
     "email": "me@danielsh.com",
     "socials": [
-      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/d-shabanian-5a4499206/" }
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/d-shabanian-5a4499206/" },
+      { "label": "GitHub", "url": "https://github.com/danielshabanian" }
     ]
   },
   "seo": {
@@ -13,7 +14,7 @@
     "description": "PhD researcher at Nottingham Trent University (MEDRG) building ScoliBot, a co-robotic system for spinal surgery with a trust-calibrated explanation layer."
   },
   "hero": {
-    "kicker": "PhD Researcher · Trustworthy autonomy for spinal surgery · MEDRG, Nottingham Trent University",
+    "kicker": "PhD Researcher · MEDRG, Nottingham Trent University",
     "headline": "Teaching surgical robots to *explain* themselves.",
     "lede": "A mechanical engineer turned robotics researcher. I build ScoliBot, a co-robotic system for spinal surgery, and the trust-calibrated explanation layer that lets surgeons see why the robot acts, and when to step in.",
     "hud": ["TARGET L2 · LOCKED", "TRUST · CALIBRATED"]
@@ -51,8 +52,8 @@
     ]
   },
   "path": {
-    "nav": "Path",
-    "kicker": "Path",
+    "nav": "Experience",
+    "kicker": "Experience",
     "title": "Experience & education.",
     "skills": ["Surgical robotics", "Trustworthy autonomy", "Explainable AI", "Machine learning", "C++", "Linux", "Isaac ROS", "Isaac Sim", "Abaqus", "SolidWorks", "Gambit", "Modeling & simulation", "Usability studies (SUS, NASA-TLX)", "Interdisciplinary collaboration"],
     "timeline": [

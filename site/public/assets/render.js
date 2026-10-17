@@ -28,7 +28,15 @@ const icon = {
   auto: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
   sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+  linkedin: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>',
+  github: '<svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>',
 };
+
+// Social links: known networks get their mark, anything else shows its label.
+function socialIcon(s) {
+  const k = String(s.label || "").toLowerCase();
+  return k.includes("linkedin") ? icon.linkedin : k.includes("github") ? icon.github : "";
+}
 
 function media(c, slug, cls, alt) {
   const m = slug && c.media && c.media[slug];
@@ -157,6 +165,7 @@ ${link(f.link, "text-link")}
 };
 
 const ORDER = ["research", "publications", "path", "life", "talks"];
+const NAV = ["research", "publications", "path", "talks"]; // keep the top bar short
 
 // Hero instrument: a scoliotic spine (T9–L5, frontal view) inside the robot's targeting rings.
 // Everything is drawn around the viewBox centre (220, 220); app.js animates it.
@@ -200,12 +209,6 @@ function sacrum(y) {
 
 function instrument() {
   const C = 220;
-  const ticks = Array.from({ length: 72 }, (_, i) => {
-    const a = (i / 72) * Math.PI * 2;
-    const r1 = i % 6 === 0 ? 188 : 193;
-    const p = (r) => `${(C + r * Math.cos(a)).toFixed(1)} ${(C + r * Math.sin(a)).toFixed(1)}`;
-    return `M${p(r1)}L${p(198)}`;
-  }).join("");
   const last = VERTEBRAE[VERTEBRAE.length - 1];
   const verts = VERTEBRAE.map(
     (v, i) => `<g transform="translate(${C} ${v.y})"><g class="vert" data-label="${v.label}" transform="translate(${v.dx} 0) rotate(${v.rot})">
@@ -216,16 +219,14 @@ ${vertebra(v, i === VERTEBRAE.length - 1)}
   return `<div class="instrument">
 <svg viewBox="0 0 440 440" width="100%" height="100%" role="img" aria-label="A robot's targeting rings scanning a curved spine, locking onto a vertebra and straightening the curve">
 <defs>
-<clipPath id="inst-clip"><circle cx="${C}" cy="${C}" r="150"/></clipPath>
+<clipPath id="inst-clip"><circle cx="${C}" cy="${C}" r="160"/></clipPath>
 <linearGradient id="inst-scan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--accent);stop-opacity:0"/><stop offset="1" style="stop-color:var(--accent);stop-opacity:.28"/></linearGradient>
 </defs>
 <g class="layer-back">
-<path class="ring-ticks" d="${ticks}" stroke="var(--line)" stroke-width="1"/>
-<g class="ring-outer"><circle cx="${C}" cy="${C}" r="210" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="1 7"/><path d="M${C} 6v14" stroke="var(--accent)" stroke-width="2"/></g>
-<circle class="ring-mid" cx="${C}" cy="${C}" r="172" fill="none" stroke="var(--line)" stroke-width="1"/>
-<g class="orbit"><circle cx="${C}" cy="${C - 172}" r="4.5" fill="var(--accent)"/></g>
-<circle class="ring-inner" cx="${C}" cy="${C}" r="150" fill="none" stroke="var(--line)" stroke-width="1"/>
-<path class="cross" d="M${C} 52v26M${C} 362v26M52 ${C}h26M362 ${C}h26" stroke="var(--muted)" stroke-width="1"/>
+<g class="ring-outer"><circle cx="${C}" cy="${C}" r="196" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="1 7"/></g>
+<circle class="ring-inner" cx="${C}" cy="${C}" r="160" fill="none" stroke="var(--line)" stroke-width="1"/>
+<g class="orbit"><circle cx="${C}" cy="${C - 160}" r="4" fill="var(--accent)"/></g>
+<path class="cross" d="M${C} 50v14M${C} 376v14M50 ${C}h14M376 ${C}h14" stroke="var(--muted)" stroke-width="1"/>
 </g>
 <g clip-path="url(#inst-clip)">
 <line class="axis" x1="${C}" y1="78" x2="${C}" y2="362" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 5"/>
@@ -258,29 +259,35 @@ export function renderBody(c) {
     if (!html) continue;
     n += 1;
     rendered.push(html);
-    nav.push(`<a href="#${key}">${esc(c[key].nav || key)}</a>`);
+    if (NAV.includes(key)) nav.push(`<a href="#${key}">${esc(c[key].nav || key)}</a>`);
   }
   const cv = c.media && c.media.cv && safeUrl(c.media.cv.src);
   const email = String(p.email || "").trim();
-  const socials = (p.socials || [])
-    .filter((s) => safeUrl(s.url))
-    .map((s) => `<a class="btn btn-ghost btn-lg" data-magnetic href="${esc(safeUrl(s.url))}" target="_blank" rel="noopener">${esc(s.label)}</a>`)
+  const links = (p.socials || []).filter((s) => safeUrl(s.url));
+  const ext = (s) => `href="${esc(safeUrl(s.url))}" target="_blank" rel="noopener me"`;
+  const socials = links.map((s) => `<a class="btn btn-ghost btn-lg" data-magnetic ${ext(s)}>${socialIcon(s)}${esc(s.label)}</a>`).join("");
+  const navSocials = links
+    .map((s) => (socialIcon(s) ? `<a class="icon-link" ${ext(s)} aria-label="${esc(s.label)}" title="${esc(s.label)}">${socialIcon(s)}</a>` : ""))
     .join("");
+  const footSocials = links.map((s) => `<a ${ext(s)}>${esc(s.label)}</a>`).join("");
   const marquee = (c.marquee || []).map((m) => `<span class="mq-item">${esc(m)}<span class="accent mq-star">✦</span></span>`).join("");
 
   return `<div class="progress" aria-hidden="true"></div>
 <header class="nav">
 <div class="wrap nav-in">
 <a href="#top" class="brand"><span class="mono-badge">${esc(p.monogram || "")}</span><span class="brand-name">${esc(p.name)}</span></a>
+<div class="nav-right">
 <nav aria-label="Primary" class="nav-links">
 ${nav.join("\n")}
-<div role="group" aria-label="Colour theme" class="theme">
-<button type="button" data-theme-pick="auto" aria-label="Use system theme" title="Use system theme">${icon.auto}</button>
-<button type="button" data-theme-pick="light" aria-label="Light theme" title="Light theme">${icon.sun}</button>
-<button type="button" data-theme-pick="dark" aria-label="Dark theme" title="Dark theme">${icon.moon}</button>
-</div>
-<a href="#contact" class="btn btn-ink" data-magnetic>Get in touch</a>
+<a href="#contact">Contact</a>
 </nav>
+<div class="nav-tools">
+${navSocials}
+<button type="button" class="icon-link theme-toggle" data-theme-toggle aria-label="Colour theme: system" title="Colour theme: system">
+<span data-for="auto">${icon.auto}</span><span data-for="light">${icon.sun}</span><span data-for="dark">${icon.moon}</span>
+</button>
+</div>
+</div>
 </div>
 </header>
 <main>
@@ -309,7 +316,7 @@ ${socials}
 </section>
 </div>
 </main>
-<footer class="foot"><div class="wrap foot-in label muted"><span>© ${new Date().getFullYear()} ${esc(p.name)}${p.location ? ` · ${esc(p.location)}` : ""}</span><span data-theme-label>Theme follows your system</span></div></footer>`;
+<footer class="foot"><div class="wrap foot-in label muted"><span>© ${new Date().getFullYear()} ${esc(p.name)}${p.location ? ` · ${esc(p.location)}` : ""}</span><span class="foot-links">${email ? `<a href="mailto:${esc(email)}">${esc(email)}</a>` : ""}${footSocials}</span></div></footer>`;
 }
 
 export function renderMeta(c) {
