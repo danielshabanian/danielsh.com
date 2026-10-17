@@ -1,6 +1,5 @@
-// Secrets set with `wrangler secret put` (not in wrangler.jsonc, so `wrangler types` doesn't see them).
+// Secret set with `wrangler secret put` (not in wrangler.jsonc, so `wrangler types` doesn't see it).
 interface McpSecrets {
-  GITHUB_CLIENT_ID: string;
   GITHUB_CLIENT_SECRET: string;
 }
 interface Env extends McpSecrets {}

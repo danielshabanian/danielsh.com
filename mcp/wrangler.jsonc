@@ -4,13 +4,20 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
-  "routes": [{ "pattern": "mcp.danielsh.com", "custom_domain": true }],
-  "workers_dev": true,
+  // Lives under the main site; Pages serves every other path.
+  "routes": [
+    { "pattern": "danielsh.com/mcp*", "zone_name": "danielsh.com" },
+    { "pattern": "danielsh.com/oauth/*", "zone_name": "danielsh.com" },
+    { "pattern": "danielsh.com/.well-known/oauth-*", "zone_name": "danielsh.com" }
+  ],
+  "workers_dev": false,
   "vars": {
     "ADMIN_GITHUB_LOGIN": "danielshabanian",
-    "SITE_URL": "https://danielsh.com"
+    "SITE_URL": "https://danielsh.com",
+    // GitHub OAuth App "danielsh.com site admin (MCP)", callback https://danielsh.com/oauth/callback
+    "GITHUB_CLIENT_ID": "Ov23libKciTlp0BtyfjD"
   },
-  // Secrets (wrangler secret put): GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
+  // Secret (wrangler secret put): GITHUB_CLIENT_SECRET
   "kv_namespaces": [
     { "binding": "OAUTH_KV", "id": "160fda74aacc4f6fbebcb259a1ccfc9a" },
     { "binding": "SITE", "id": "4573c2d2c4364b1ba89c14362ed66578" }

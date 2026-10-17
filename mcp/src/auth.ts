@@ -1,4 +1,4 @@
-import type { AuthRequest, ConsentDescription, OAuthHelpers } from "@cloudflare/workers-oauth-provider";
+﻿import type { AuthRequest, ConsentDescription, OAuthHelpers } from "@cloudflare/workers-oauth-provider";
 
 // OAuth 2.1 authorization for the MCP server.
 // MCP client -> /authorize (our consent page) -> GitHub sign-in -> /callback
@@ -47,7 +47,7 @@ function consentPage(d: ConsentDescription, handle: string, headers: Headers) {
 <dt>Sends tokens to</dt><dd>${esc(d.redirectHost)}</dd>
 <dt>Access</dt><dd>${esc(d.scope.length ? d.scope.join(", ") : "site:write")}</dd></dl>
 ${d.redirectIsLoopback ? `<div class="warn">This redirects to an app on your own computer. Only approve if you just started this connection.</div>` : ""}
-<form method="post" action="/authorize"><input type="hidden" name="handle" value="${esc(handle)}">
+<form method="post" action="/oauth/authorize"><input type="hidden" name="handle" value="${esc(handle)}">
 <div class="row"><button class="go" name="decision" value="approve" type="submit">Continue with GitHub</button><button name="decision" value="deny" type="submit">Cancel</button></div></form>`,
     headers
   );
@@ -64,12 +64,12 @@ export const authHandler = {
     const url = new URL(request.url);
     const oauth = env.OAUTH_PROVIDER;
 
-    if (url.pathname === "/" ) {
+    if (url.pathname === "/oauth" || url.pathname === "/oauth/") {
       return page("danielsh.com MCP", `<span class="k">Private</span><h1>Site admin <em>MCP</em></h1><p>This is a private Model Context Protocol server for editing danielsh.com. Connect an MCP client to <code>${esc(url.origin)}/mcp</code>; it will ask you to sign in.</p>`);
     }
 
     // 1. Consent page.
-    if (url.pathname === "/authorize" && request.method === "GET") {
+    if (url.pathname === "/oauth/authorize" && request.method === "GET") {
       let authReq: AuthRequest;
       try {
         authReq = await oauth.parseAuthRequest(request);
@@ -82,7 +82,7 @@ export const authHandler = {
     }
 
     // 2. Consent decision -> GitHub.
-    if (url.pathname === "/authorize" && request.method === "POST") {
+    if (url.pathname === "/oauth/authorize" && request.method === "POST") {
       const form = await request.formData();
       const handle = String(form.get("handle") ?? "");
       try {
@@ -94,7 +94,7 @@ export const authHandler = {
         const { state, headers } = await oauth.beginUpstream(approved.request, { headers: approved.headers });
         const gh = new URL("https://github.com/login/oauth/authorize");
         gh.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
-        gh.searchParams.set("redirect_uri", new URL("/callback", url.origin).href);
+        gh.searchParams.set("redirect_uri", new URL("/oauth/callback", url.origin).href);
         gh.searchParams.set("scope", "read:user");
         gh.searchParams.set("state", state);
         gh.searchParams.set("allow_signup", "false");
@@ -105,7 +105,7 @@ export const authHandler = {
     }
 
     // 3. GitHub callback -> check the account -> issue the grant.
-    if (url.pathname === "/callback") {
+    if (url.pathname === "/oauth/callback") {
       let resumed;
       try {
         resumed = await oauth.finishUpstream(request);
@@ -122,7 +122,7 @@ export const authHandler = {
           client_id: env.GITHUB_CLIENT_ID,
           client_secret: env.GITHUB_CLIENT_SECRET,
           code,
-          redirect_uri: new URL("/callback", url.origin).href,
+          redirect_uri: new URL("/oauth/callback", url.origin).href,
         }),
       });
       const tok = (await tokenRes.json()) as { access_token?: string };

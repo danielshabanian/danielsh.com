@@ -176,11 +176,13 @@ export class SiteMCP extends McpAgent<Env, unknown, Props> {
 export default new OAuthProvider({
   apiHandlers: { "/mcp": SiteMCP.serve("/mcp") as any },
   defaultHandler: authHandler as any,
-  authorizeEndpoint: "/authorize",
-  tokenEndpoint: "/token",
-  clientRegistrationEndpoint: "/register",
+  // Served on danielsh.com itself: Worker routes take /mcp*, /oauth/* and
+  // /.well-known/oauth-*; Pages serves everything else.
+  authorizeEndpoint: "/oauth/authorize",
+  tokenEndpoint: "/oauth/token",
+  clientRegistrationEndpoint: "/oauth/register",
   scopesSupported: ["site:write"],
-  resourceMetadata: { resource: "https://mcp.danielsh.com/mcp", resource_name: "danielsh.com site admin" },
+  resourceMetadata: { resource: "https://danielsh.com/mcp", resource_name: "danielsh.com site admin" },
   accessTokenTTL: 60 * 60,
   refreshTokenTTL: 60 * 60 * 24 * 30,
 });
