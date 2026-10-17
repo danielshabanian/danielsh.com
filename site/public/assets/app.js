@@ -80,10 +80,11 @@ function initInstrument(gsap, intro, art, fine, ctx) {
   intro.from(art, { opacity: 0, scale: 0.92, duration: 1.4 }, 0.2);
   if (window.DrawSVGPlugin) {
     intro.from(art.querySelectorAll(".ring-inner, .ring-mid, .ring-outer circle"), { drawSVG: "50% 50%", duration: 1.6, stagger: 0.12, ease: "power3.inOut" }, 0.25)
-      .from(art.querySelectorAll(".vert-body"), { drawSVG: "50% 50%", duration: 0.7, stagger: 0.07, ease: "power2.out" }, 0.7);
+      .from(art.querySelectorAll(".vert-body"), { drawSVG: "50% 50%", duration: 0.7, stagger: 0.06, ease: "power2.out" }, 0.6);
   }
   intro.from(".instrument .ring-ticks, .instrument .cross", { opacity: 0, duration: 1 }, 0.5)
-    .from(art.querySelectorAll(".vert-proc"), { opacity: 0, duration: 0.4, stagger: 0.07 }, 0.9)
+    .from(art.querySelectorAll(".vert-part, .vert-disc"), { opacity: 0, duration: 0.5, stagger: 0.015 }, 0.9)
+    .from(".instrument .sacrum", { opacity: 0, duration: 0.6 }, 1.3)
     .from(".instrument .hud", { x: -16, opacity: 0, duration: 0.8 }, 1.3);
 
   /* ambient: rings turn about the true centre */
@@ -94,12 +95,12 @@ function initInstrument(gsap, intro, art, fine, ctx) {
   /* the loop */
   const loop = gsap.timeline({ repeat: -1, paused: true, defaults: { ease: "power3.inOut" } });
   const hit = (on) => verts.forEach((el, i) => el.classList.toggle("is-hit", on === i));
-  const scanPos = { y: 80 };
+  const scanPos = { y: 70 };
   loop
     .call(say(hudState, "SCANNING")).call(say(hudTarget, "—"))
     .set(scan, { opacity: 1 })
-    .fromTo(scanPos, { y: 80 }, {
-      y: 362, duration: 2.4, ease: "sine.inOut",
+    .fromTo(scanPos, { y: 70 }, {
+      y: 372, duration: 2.4, ease: "sine.inOut",
       onUpdate: () => {
         scan.setAttribute("transform", `translate(0 ${scanPos.y.toFixed(1)})`);
         const i = VERTEBRAE.findIndex((v) => Math.abs(v.y - scanPos.y) < 11);

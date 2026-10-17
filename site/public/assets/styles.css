@@ -1,4 +1,4 @@
-/* Tokens: danial-shabanian design system. Dark/light follow the system unless a
+﻿/* Tokens: danial-shabanian design system. Dark/light follow the system unless a
    choice is saved (html[data-theme]). */
 :root {
   --bg: #0A0C0F; --surface: #12161B; --line: #262C34; --ink: #ECEDEE; --muted: #9BA4AE;
@@ -91,13 +91,18 @@ a.pill:hover { border-color: var(--ink); }
 .hero-art { flex: 1 1 380px; min-width: 0; display: flex; justify-content: center; }
 .instrument { position: relative; width: 460px; max-width: 100%; aspect-ratio: 1; transform-style: preserve-3d; will-change: transform; }
 .instrument svg { overflow: visible; display: block; }
-.vert-body { fill: var(--bg); stroke: var(--ink); stroke-width: 1.5; }
-.vert-proc { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-linecap: round; }
+/* Spine (frontal view). Colours live here, not in the SVG, so both themes work. */
+.vert-body { fill: var(--bg); stroke: var(--ink); stroke-width: 1.4; }
+.vert-part { fill: var(--bg); stroke: var(--ink); stroke-width: 1.1; stroke-linejoin: round; }
+.vert-disc { fill: none; stroke: var(--muted); stroke-width: 1; opacity: .7; }
 .vert-label { font: 9px var(--mono); letter-spacing: .08em; fill: var(--muted); opacity: 0; }
-.vert.is-hit .vert-body { stroke: var(--accent); }
+.sacrum path { fill: var(--bg); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+.sacrum-holes circle { fill: none; stroke: var(--muted); stroke-width: 1; }
+.vert.is-hit .vert-body, .vert.is-hit .vert-part { stroke: var(--accent); }
 .vert.is-locked .vert-body { fill: color-mix(in srgb, var(--accent) 22%, var(--bg)); stroke: var(--accent); }
+.vert.is-locked .vert-part { stroke: var(--accent); }
 .vert.is-locked .vert-label { fill: var(--accent); }
-.vert-body, .vert-proc { transition: stroke .35s, fill .35s; }
+.vert-body, .vert-part { transition: stroke .35s, fill .35s; }
 html.js.motion .scan, html.js.motion .axis { opacity: 0; }
 .hud { position: absolute; left: 0; bottom: 2%; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-left: 1px solid var(--accent); background: color-mix(in srgb, var(--bg) 70%, transparent); }
 .hud-row { white-space: pre; }

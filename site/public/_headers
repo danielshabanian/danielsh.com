@@ -4,5 +4,6 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   X-Frame-Options: DENY
 
+# Asset URLs are versioned (?v=<content hash>) by functions/index.js.
 /assets/*
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=31536000, immutable

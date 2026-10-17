@@ -1,4 +1,4 @@
-// Renders the page body from content.json. Shared by the Pages Function (server
+﻿// Renders the page body from content.json. Shared by the Pages Function (server
 // render at "/") and the browser (fallback when the function isn't available).
 
 const esc = (s) =>
@@ -158,15 +158,45 @@ ${link(f.link, "text-link")}
 
 const ORDER = ["research", "publications", "path", "life", "talks"];
 
-// Hero instrument: a scoliotic spine (T9–L5) inside the robot's targeting rings.
+// Hero instrument: a scoliotic spine (T9–L5, frontal view) inside the robot's targeting rings.
 // Everything is drawn around the viewBox centre (220, 220); app.js animates it.
+const STEP = 26;
 export const VERTEBRAE = ["T9", "T10", "T11", "T12", "L1", "L2", "L3", "L4", "L5"].map((label, i, all) => {
   const t = i / (all.length - 1);
-  const y = 112 + i * 27;
-  const dx = 19 * Math.sin(2 * Math.PI * t); // the scoliotic S-curve, centred on the axis
-  const slope = (19 * 2 * Math.PI * Math.cos(2 * Math.PI * t)) / ((all.length - 1) * 27);
-  return { label, y, dx: +dx.toFixed(2), rot: +((Math.atan(slope) * 180) / Math.PI * 0.55).toFixed(2), w: Math.round(42 + i * 2.8), h: Math.round(16 + i * 0.7) };
+  const dx = 19 * Math.sin(2 * Math.PI * t); // thoracic curve right, lumbar curve left
+  const slope = (19 * 2 * Math.PI * Math.cos(2 * Math.PI * t)) / ((all.length - 1) * STEP);
+  const lumbar = label[0] === "L";
+  return {
+    label, lumbar,
+    y: 96 + i * STEP,
+    dx: +dx.toFixed(2),
+    // endplates stay perpendicular to the curve (negative: SVG y points down)
+    rot: +((-Math.atan(slope) * 180) / Math.PI * 0.9).toFixed(2),
+    w: +(34 + i * 2).toFixed(1), // bodies widen towards the lumbar spine
+    h: +(15 + i * 0.6).toFixed(1),
+    tp: lumbar ? (label === "L3" ? 15 : 13) : 10, // transverse process length
+  };
 });
+
+function vertebra(v, last) {
+  const w2 = v.w / 2, h2 = v.h / 2, f = (n) => +n.toFixed(1);
+  const tilt = v.lumbar ? 0 : -3; // thoracic processes angle upward
+  const side = (s) => {
+    const x0 = s * w2, x1 = s * (w2 + v.tp), y0 = -h2 + 3;
+    let d = `M${f(x0)} ${f(y0)}L${f(x1)} ${f(y0 + 1.5 + tilt)}L${f(x1)} ${f(y0 + 4 + tilt)}L${f(x0)} ${f(y0 + 6.5)}Z`;
+    return d;
+  };
+  const disc = last ? "" : `<rect class="vert-disc" x="${f(-w2 + 3)}" y="${f(h2 + 2)}" width="${f(v.w - 6)}" height="${f(STEP - v.h - 4)}" rx="2"/>`;
+  return `<rect class="vert-body" x="${f(-w2)}" y="${f(-h2)}" width="${v.w}" height="${v.h}" rx="3.5"/>
+<path class="vert-part" d="${side(-1)}${side(1)}M0 -3C3 -1 3 5 0 7C-3 5 -3 -1 0 -3Z"/>
+<ellipse class="vert-part" cx="${f(-w2 + 7)}" cy="-1" rx="3" ry="3.8"/><ellipse class="vert-part" cx="${f(w2 - 7)}" cy="-1" rx="3" ry="3.8"/>
+${disc}`;
+}
+
+function sacrum(y) {
+  const holes = [[9, 12, 2.4], [8, 22, 2.1], [7, 31, 1.8]].map(([x, yy, r]) => `<circle cx="-${x}" cy="${yy}" r="${r}"/><circle cx="${x}" cy="${yy}" r="${r}"/>`).join("");
+  return `<g class="sacrum" transform="translate(220 ${y})"><path d="M-30 0H30Q29 22 10 44Q0 50 -10 44Q-29 22 -30 0Z"/><g class="sacrum-holes">${holes}</g><path d="M0 49v8"/></g>`;
+}
 
 function instrument() {
   const C = 220;
@@ -176,13 +206,13 @@ function instrument() {
     const p = (r) => `${(C + r * Math.cos(a)).toFixed(1)} ${(C + r * Math.sin(a)).toFixed(1)}`;
     return `M${p(r1)}L${p(198)}`;
   }).join("");
+  const last = VERTEBRAE[VERTEBRAE.length - 1];
   const verts = VERTEBRAE.map(
-    (v) => `<g transform="translate(${C} ${v.y})"><g class="vert" data-label="${v.label}" transform="translate(${v.dx} 0) rotate(${v.rot})">
-<rect class="vert-body" x="${-v.w / 2}" y="${-v.h / 2}" width="${v.w}" height="${v.h}" rx="${(v.h / 2.4).toFixed(1)}"/>
-<path class="vert-proc" d="M${-v.w / 2} 0h-9M${v.w / 2} 0h9"/>
-<text class="vert-label" x="${v.w / 2 + 16}" y="3.5">${v.label}</text>
+    (v, i) => `<g transform="translate(${C} ${v.y})"><g class="vert" data-label="${v.label}" transform="translate(${v.dx} 0) rotate(${v.rot})">
+${vertebra(v, i === VERTEBRAE.length - 1)}
+<text class="vert-label" x="${(v.w / 2 + v.tp + 8).toFixed(1)}" y="3">${v.label}</text>
 </g></g>`
-  ).join("");
+  ).join("") + sacrum(last.y + last.h / 2 + 6);
   return `<div class="instrument">
 <svg viewBox="0 0 440 440" width="100%" height="100%" role="img" aria-label="A robot's targeting rings scanning a curved spine, locking onto a vertebra and straightening the curve">
 <defs>
@@ -198,13 +228,13 @@ function instrument() {
 <path class="cross" d="M${C} 52v26M${C} 362v26M52 ${C}h26M362 ${C}h26" stroke="var(--muted)" stroke-width="1"/>
 </g>
 <g clip-path="url(#inst-clip)">
-<line class="axis" x1="${C}" y1="88" x2="${C}" y2="352" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 5"/>
+<line class="axis" x1="${C}" y1="78" x2="${C}" y2="362" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 5"/>
 <g class="scan" transform="translate(0 80)"><rect x="60" y="-36" width="320" height="36" fill="url(#inst-scan)"/><line x1="60" y1="0" x2="380" y2="0" stroke="var(--accent)" stroke-width="1.25"/></g>
 </g>
 <g class="layer-front">
 <g class="spine">${verts}</g>
 <g class="reticle" transform="translate(${C + VERTEBRAE[5].dx} ${VERTEBRAE[5].y}) rotate(${VERTEBRAE[5].rot})">
-<g class="ret-box" transform="scale(1)"><path d="M-46 -20v-8h12M46 -20v-8h-12M-46 20v8h12M46 20v8h-12" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></g>
+<g class="ret-box" transform="scale(1)"><path d="M-46 -17v-8h12M46 -17v-8h-12M-46 17v8h12M46 17v8h-12" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></g>
 <circle r="2.5" fill="var(--accent)"/>
 </g>
 </g>
