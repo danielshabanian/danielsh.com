@@ -13,7 +13,7 @@ const esc = (s: unknown) =>
 function page(title: string, body: string, headers = new Headers(), status = 200) {
   headers.set("content-type", "text/html; charset=utf-8");
   headers.set("cache-control", "no-store");
-  headers.set("content-security-policy", "default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; form-action 'self' https://github.com; frame-ancestors 'none'; base-uri 'none'");
+  headers.set("content-security-policy", "default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'none'");
   headers.set("x-frame-options", "DENY");
   return new Response(
     `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
