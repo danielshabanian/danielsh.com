@@ -1,4 +1,4 @@
-import { renderBody } from "./render.js";
+﻿import { renderBody, VERTEBRAE } from "./render.js";
 
 const root = document.documentElement;
 const app = document.getElementById("app");
@@ -52,6 +52,117 @@ function initNavSpy() {
   links.forEach((_, id) => { const s = document.getElementById(id); if (s) io.observe(s); });
 }
 
+/* ---------- hero instrument ---------- */
+function initInstrument(gsap, intro, art, fine, ctx) {
+  const C = 220;
+  const $ = (s) => art.querySelector(s);
+  const verts = [...art.querySelectorAll(".vert")];
+  const reticle = $(".reticle"), box = $(".ret-box"), scan = $(".scan"), axis = $(".axis");
+  const hudTarget = $(".hud-target"), hudState = $(".hud-state"), hudTrust = $(".hud-trust");
+  const at = (label) => VERTEBRAE.findIndex((v) => v.label === label);
+  const curve = (v) => `translate(${v.dx} 0) rotate(${v.rot})`;
+  const straight = "translate(0 0) rotate(0)";
+  const retAt = (v, aligned) => `translate(${C + (aligned ? 0 : v.dx)} ${v.y}) rotate(${aligned ? 0 : v.rot})`;
+  const say = (el, text) => () => {
+    if (window.ScrambleTextPlugin) gsap.to(el, { duration: 0.6, scrambleText: { text, chars: "01<>/#", speed: 0.8 }, overwrite: true });
+    else el.textContent = text;
+  };
+  const trust = { v: 0 };
+  const showTrust = () => (hudTrust.textContent = trust.v.toFixed(2));
+  const L2 = VERTEBRAE[at("L2")];
+
+  // Starting state for the loop.
+  gsap.set(reticle, { opacity: 0, attr: { transform: retAt(VERTEBRAE[at("T12")]) } });
+  gsap.set(axis, { opacity: 0 });
+  hudTarget.textContent = "—"; hudState.textContent = "STANDBY"; showTrust();
+
+  /* intro: rings draw, ticks fade, vertebrae stack top-down */
+  intro.from(art, { opacity: 0, scale: 0.92, duration: 1.4 }, 0.2);
+  if (window.DrawSVGPlugin) {
+    intro.from(art.querySelectorAll(".ring-inner, .ring-mid, .ring-outer circle"), { drawSVG: "50% 50%", duration: 1.6, stagger: 0.12, ease: "power3.inOut" }, 0.25)
+      .from(art.querySelectorAll(".vert-body"), { drawSVG: "50% 50%", duration: 0.7, stagger: 0.07, ease: "power2.out" }, 0.7);
+  }
+  intro.from(".instrument .ring-ticks, .instrument .cross", { opacity: 0, duration: 1 }, 0.5)
+    .from(art.querySelectorAll(".vert-proc"), { opacity: 0, duration: 0.4, stagger: 0.07 }, 0.9)
+    .from(".instrument .hud", { x: -16, opacity: 0, duration: 0.8 }, 1.3);
+
+  /* ambient: rings turn about the true centre */
+  gsap.to(".instrument .ring-outer", { rotation: 360, svgOrigin: `${C} ${C}`, duration: 80, repeat: -1, ease: "none" });
+  gsap.to(".instrument .ring-ticks", { rotation: -360, svgOrigin: `${C} ${C}`, duration: 140, repeat: -1, ease: "none" });
+  gsap.to(".instrument .orbit", { rotation: 360, svgOrigin: `${C} ${C}`, duration: 14, repeat: -1, ease: "none" });
+
+  /* the loop */
+  const loop = gsap.timeline({ repeat: -1, paused: true, defaults: { ease: "power3.inOut" } });
+  const hit = (on) => verts.forEach((el, i) => el.classList.toggle("is-hit", on === i));
+  const scanPos = { y: 80 };
+  loop
+    .call(say(hudState, "SCANNING")).call(say(hudTarget, "—"))
+    .set(scan, { opacity: 1 })
+    .fromTo(scanPos, { y: 80 }, {
+      y: 362, duration: 2.4, ease: "sine.inOut",
+      onUpdate: () => {
+        scan.setAttribute("transform", `translate(0 ${scanPos.y.toFixed(1)})`);
+        const i = VERTEBRAE.findIndex((v) => Math.abs(v.y - scanPos.y) < 11);
+        hit(i);
+      },
+    })
+    .to(scan, { opacity: 0, duration: 0.3 }).call(() => hit(-1))
+    // hunt: T12 -> L1 -> L2
+    .call(say(hudState, "SEARCHING")).call(say(hudTarget, "T12"))
+    .fromTo(reticle, { opacity: 0 }, { opacity: 1, duration: 0.3 })
+    .fromTo(box, { attr: { transform: "scale(1.8)" } }, { attr: { transform: "scale(1)" }, duration: 0.5, ease: "back.out(2)" }, "<")
+    .to(reticle, { attr: { transform: retAt(VERTEBRAE[at("L1")]) }, duration: 0.55 }, "+=0.35").call(say(hudTarget, "L1"), null, "<")
+    .to(reticle, { attr: { transform: retAt(L2) }, duration: 0.55 }, "+=0.3").call(say(hudTarget, "L2"), null, "<")
+    // lock
+    .to(box, { attr: { transform: "scale(0.82)" }, duration: 0.18, ease: "power2.in" }, "+=0.15")
+    .to(box, { attr: { transform: "scale(1)" }, duration: 0.5, ease: "elastic.out(1, 0.4)" })
+    .call(() => verts[at("L2")].classList.add("is-locked"), null, "<")
+    .to(verts[at("L2")].querySelector(".vert-label"), { opacity: 1, duration: 0.3 }, "<")
+    .call(say(hudState, "LOCKED"), null, "<")
+    .fromTo(trust, { v: 0.31 }, { v: 0.94, duration: 1.1, ease: "power2.out", onUpdate: showTrust, immediateRender: false }, "<")
+    // correct: the curve straightens along the planned axis
+    .call(say(hudState, "CORRECTING"), null, "+=0.5")
+    .to(axis, { opacity: 0.9, duration: 0.4 }, "<")
+    .to(verts, { attr: { transform: straight }, duration: 1.7, stagger: { each: 0.05, from: "center" } }, "<")
+    .to(reticle, { attr: { transform: retAt(L2, true) }, duration: 1.7 }, "<")
+    .call(say(hudState, "ALIGNED"))
+    .to({}, { duration: 1.8 })
+    // relax back to the start
+    .call(say(hudState, "RESET"))
+    .to(reticle, { opacity: 0, duration: 0.4 })
+    .to([axis, verts[at("L2")].querySelector(".vert-label")], { opacity: 0, duration: 0.4 }, "<")
+    .call(() => verts[at("L2")].classList.remove("is-locked"), null, "<")
+    .to(verts, { attr: { transform: (i) => curve(VERTEBRAE[i]) }, duration: 1.5, stagger: { each: 0.04, from: "edges" } }, "<")
+    .to(trust, { v: 0, duration: 0.6, onUpdate: showTrust }, "<")
+    .set(reticle, { attr: { transform: retAt(VERTEBRAE[at("T12")]) } })
+    .to({}, { duration: 0.4 });
+  intro.call(() => loop.play(), null, 2.2);
+  ctx.add(() => () => loop.kill());
+
+  /* pointer: tilt the instrument in 3D, layers shift for depth */
+  if (fine) {
+    const wrap = $(".instrument") || art.firstElementChild;
+    gsap.set(wrap, { transformPerspective: 900 });
+    const rx = gsap.quickTo(wrap, "rotationX", { duration: 0.9, ease: "power3" });
+    const ry = gsap.quickTo(wrap, "rotationY", { duration: 0.9, ease: "power3" });
+    const bx = gsap.quickTo(".instrument .layer-back", "x", { duration: 1.1, ease: "power3" });
+    const by = gsap.quickTo(".instrument .layer-back", "y", { duration: 1.1, ease: "power3" });
+    const fx = gsap.quickTo(".instrument .layer-front", "x", { duration: 0.9, ease: "power3" });
+    const fy = gsap.quickTo(".instrument .layer-front", "y", { duration: 0.9, ease: "power3" });
+    const onMove = (e) => {
+      const nx = e.clientX / innerWidth - 0.5, ny = e.clientY / innerHeight - 0.5;
+      ry(nx * 14); rx(ny * -10); bx(nx * -8); by(ny * -8); fx(nx * 6); fy(ny * 6);
+    };
+    addEventListener("pointermove", onMove);
+    ctx.add(() => () => removeEventListener("pointermove", onMove));
+  }
+
+  /* scroll away: settle back and fade as the hero leaves */
+  // Keyed to the instrument itself, so on phones (where it sits below the text) it stays visible until it scrolls past.
+  // (Tweens the inner .instrument's svg, not `art`, so it never fights the intro's opacity/scale.)
+  gsap.fromTo(art.querySelector("svg"), { yPercent: 0, scale: 1, opacity: 1 }, { yPercent: 10, scale: 0.94, opacity: 0.25, ease: "none", immediateRender: false, scrollTrigger: { trigger: art, start: "top top", end: "bottom top", scrub: true } });
+}
+
 /* ---------- GSAP ---------- */
 function initMotion() {
   const { gsap } = window;
@@ -88,46 +199,10 @@ function initMotion() {
       .from('[data-hero="cta"] > *', { y: 20, opacity: 0, duration: 0.9, stagger: 0.1 }, 0.7)
       .from(".nav", { yPercent: -100, duration: 1 }, 0);
 
-    // Instrument: rings sweep in, vertebrae draw themselves, the trajectory traces, reticle locks.
+    // Instrument: rings draw in, the curved spine assembles, then the robot loop
+    // runs: scan -> hunt for the target -> lock on L2 -> straighten the curve -> relax.
     const art = document.querySelector('[data-hero="art"]');
-    if (art) {
-      tl.from(art, { scale: 0.85, opacity: 0, duration: 1.6 }, 0.2);
-      if (window.DrawSVGPlugin) {
-        tl.from(".instrument .ring-c, .instrument .ring-b circle:first-child", { drawSVG: "50% 50%", duration: 1.6, ease: "power3.inOut" }, 0.3)
-          .from(".instrument .spine rect", { drawSVG: 0, duration: 0.9, stagger: 0.08, ease: "power2.inOut" }, 0.5)
-          .from(".instrument .ticks", { drawSVG: "50% 50%", duration: 1 }, 0.6)
-          .from(".instrument .trajectory", { drawSVG: 0, duration: 1.4, ease: "power2.inOut" }, 1.1);
-      }
-      tl.from(".instrument .reticle", { scale: 3, opacity: 0, rotate: 90, duration: 1, ease: "back.out(2)" }, 1.6);
-      if (window.ScrambleTextPlugin) {
-        document.querySelectorAll("[data-scramble]").forEach((el, i) => {
-          tl.to(el, { duration: 1.2, scrambleText: { text: el.textContent, chars: "01<>/#·", revealDelay: 0.3, speed: 0.6 } }, 1.4 + i * 0.3);
-        });
-      }
-
-      // Ambient motion.
-      gsap.to(".instrument .ring-a", { rotate: 360, duration: 38, repeat: -1, ease: "none" });
-      gsap.to(".instrument .ring-b", { rotate: -360, duration: 60, repeat: -1, ease: "none" });
-      gsap.fromTo(".instrument .scan", { yPercent: -14000 }, { yPercent: 14000, duration: 4.5, repeat: -1, yoyo: true, ease: "sine.inOut" });
-      gsap.to(".instrument .reticle", { scale: 0.82, duration: 1.2, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 2.6 });
-
-      // Scroll away: the instrument drifts and rotates as the hero leaves.
-      gsap.to(".instrument", { yPercent: 18, rotate: 12, opacity: 0.25, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
-
-      // Pointer parallax on the reticle and rings.
-      if (fine) {
-        const rx = gsap.quickTo(".instrument .reticle", "x", { duration: 0.8, ease: "power3" });
-        const ry = gsap.quickTo(".instrument .reticle", "y", { duration: 0.8, ease: "power3" });
-        const ix = gsap.quickTo(".instrument svg", "x", { duration: 1.2, ease: "power3" });
-        const iy = gsap.quickTo(".instrument svg", "y", { duration: 1.2, ease: "power3" });
-        const onMove = (e) => {
-          const nx = e.clientX / innerWidth - 0.5, ny = e.clientY / innerHeight - 0.5;
-          rx(nx * 28); ry(ny * 28); ix(nx * -10); iy(ny * -10);
-        };
-        addEventListener("pointermove", onMove);
-        ctx.add(() => () => removeEventListener("pointermove", onMove));
-      }
-    }
+    if (art) initInstrument(gsap, tl, art, fine, ctx);
 
     /* ---- marquee: endless loop that speeds up with scroll velocity ---- */
     const track = document.querySelector(".mq-track");

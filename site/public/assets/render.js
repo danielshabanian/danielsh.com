@@ -158,6 +158,65 @@ ${link(f.link, "text-link")}
 
 const ORDER = ["research", "publications", "path", "life", "talks"];
 
+// Hero instrument: a scoliotic spine (T9–L5) inside the robot's targeting rings.
+// Everything is drawn around the viewBox centre (220, 220); app.js animates it.
+export const VERTEBRAE = ["T9", "T10", "T11", "T12", "L1", "L2", "L3", "L4", "L5"].map((label, i, all) => {
+  const t = i / (all.length - 1);
+  const y = 112 + i * 27;
+  const dx = 19 * Math.sin(2 * Math.PI * t); // the scoliotic S-curve, centred on the axis
+  const slope = (19 * 2 * Math.PI * Math.cos(2 * Math.PI * t)) / ((all.length - 1) * 27);
+  return { label, y, dx: +dx.toFixed(2), rot: +((Math.atan(slope) * 180) / Math.PI * 0.55).toFixed(2), w: Math.round(42 + i * 2.8), h: Math.round(16 + i * 0.7) };
+});
+
+function instrument() {
+  const C = 220;
+  const ticks = Array.from({ length: 72 }, (_, i) => {
+    const a = (i / 72) * Math.PI * 2;
+    const r1 = i % 6 === 0 ? 188 : 193;
+    const p = (r) => `${(C + r * Math.cos(a)).toFixed(1)} ${(C + r * Math.sin(a)).toFixed(1)}`;
+    return `M${p(r1)}L${p(198)}`;
+  }).join("");
+  const verts = VERTEBRAE.map(
+    (v) => `<g transform="translate(${C} ${v.y})"><g class="vert" data-label="${v.label}" transform="translate(${v.dx} 0) rotate(${v.rot})">
+<rect class="vert-body" x="${-v.w / 2}" y="${-v.h / 2}" width="${v.w}" height="${v.h}" rx="${(v.h / 2.4).toFixed(1)}"/>
+<path class="vert-proc" d="M${-v.w / 2} 0h-9M${v.w / 2} 0h9"/>
+<text class="vert-label" x="${v.w / 2 + 16}" y="3.5">${v.label}</text>
+</g></g>`
+  ).join("");
+  return `<div class="instrument">
+<svg viewBox="0 0 440 440" width="100%" height="100%" role="img" aria-label="A robot's targeting rings scanning a curved spine, locking onto a vertebra and straightening the curve">
+<defs>
+<clipPath id="inst-clip"><circle cx="${C}" cy="${C}" r="150"/></clipPath>
+<linearGradient id="inst-scan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--accent);stop-opacity:0"/><stop offset="1" style="stop-color:var(--accent);stop-opacity:.28"/></linearGradient>
+</defs>
+<g class="layer-back">
+<path class="ring-ticks" d="${ticks}" stroke="var(--line)" stroke-width="1"/>
+<g class="ring-outer"><circle cx="${C}" cy="${C}" r="210" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="1 7"/><path d="M${C} 6v14" stroke="var(--accent)" stroke-width="2"/></g>
+<circle class="ring-mid" cx="${C}" cy="${C}" r="172" fill="none" stroke="var(--line)" stroke-width="1"/>
+<g class="orbit"><circle cx="${C}" cy="${C - 172}" r="4.5" fill="var(--accent)"/></g>
+<circle class="ring-inner" cx="${C}" cy="${C}" r="150" fill="none" stroke="var(--line)" stroke-width="1"/>
+<path class="cross" d="M${C} 52v26M${C} 362v26M52 ${C}h26M362 ${C}h26" stroke="var(--muted)" stroke-width="1"/>
+</g>
+<g clip-path="url(#inst-clip)">
+<line class="axis" x1="${C}" y1="88" x2="${C}" y2="352" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 5"/>
+<g class="scan" transform="translate(0 80)"><rect x="60" y="-36" width="320" height="36" fill="url(#inst-scan)"/><line x1="60" y1="0" x2="380" y2="0" stroke="var(--accent)" stroke-width="1.25"/></g>
+</g>
+<g class="layer-front">
+<g class="spine">${verts}</g>
+<g class="reticle" transform="translate(${C + VERTEBRAE[5].dx} ${VERTEBRAE[5].y}) rotate(${VERTEBRAE[5].rot})">
+<g class="ret-box" transform="scale(1)"><path d="M-46 -20v-8h12M46 -20v-8h-12M-46 20v8h12M46 20v8h-12" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></g>
+<circle r="2.5" fill="var(--accent)"/>
+</g>
+</g>
+</svg>
+<div class="hud label" aria-hidden="true">
+<span class="hud-row"><span class="muted">TARGET</span> <span class="hud-target">L2</span></span>
+<span class="hud-row"><span class="muted">STATE&nbsp;</span> <span class="hud-state accent">LOCKED</span></span>
+<span class="hud-row"><span class="muted">TRUST&nbsp;</span> <span class="hud-trust">0.94</span></span>
+</div>
+</div>`;
+}
+
 export function renderBody(c) {
   const p = c.profile || {};
   const h = c.hero || {};
@@ -205,23 +264,7 @@ ${nav.join("\n")}
 ${cv ? `<a href="${esc(cv)}" class="btn btn-ghost btn-lg" data-magnetic>Download CV ${icon.down}</a>` : ""}
 </div>
 </div>
-<div class="hero-art" data-hero="art">
-<div class="instrument">
-<svg viewBox="0 0 440 440" width="100%" height="100%" role="img" aria-label="Line drawing of a vertebral column inside a robot's targeting rings">
-<g class="ring-a"><circle cx="220" cy="220" r="200" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 10"/></g>
-<g class="ring-b"><circle cx="220" cy="220" r="168" fill="none" stroke="var(--line)" stroke-width="1"/><circle cx="220" cy="52" r="5" fill="var(--accent)"/><circle cx="388" cy="220" r="3" fill="var(--ink)"/></g>
-<circle class="ring-c" cx="220" cy="220" r="120" fill="none" stroke="var(--line)" stroke-width="1"/>
-<path class="ticks" d="M220 20v40M220 380v40M20 220h40M380 220h40" stroke="var(--muted)" stroke-width="1"/>
-<g class="spine" fill="none" stroke="var(--ink)" stroke-width="1.5">
-<rect x="196" y="112" width="48" height="22" rx="8"/><rect x="190" y="142" width="56" height="24" rx="9"/><rect x="186" y="174" width="62" height="26" rx="10"/><rect x="186" y="208" width="64" height="27" rx="10"/><rect x="190" y="243" width="62" height="27" rx="10"/><rect x="196" y="278" width="58" height="26" rx="10"/><rect x="202" y="312" width="52" height="24" rx="9"/>
-</g>
-<path class="trajectory" d="M220 100 C 236 160, 204 230, 228 340" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 6"/>
-<g class="reticle"><circle cx="218" cy="221" r="9" fill="none" stroke="var(--accent)" stroke-width="2"/><path d="M218 196v12M218 234v12M193 221h12M231 221h12" stroke="var(--accent)" stroke-width="2"/></g>
-</svg>
-<div class="scan" aria-hidden="true"></div>
-<div class="hud label muted" aria-hidden="true">${(h.hud || []).map((x) => `<span data-scramble>${esc(x)}</span>`).join("<br>")}</div>
-</div>
-</div>
+<div class="hero-art" data-hero="art">${instrument()}</div>
 </section>
 ${marquee ? `<div class="marquee" aria-hidden="true"><div class="mq-track">${marquee}${marquee}</div></div>` : ""}
 <div class="wrap">
