@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "danielsh-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [{ "pattern": "mcp.danielsh.com", "custom_domain": true }],
+  "workers_dev": true,
+  "vars": {
+    "ADMIN_GITHUB_LOGIN": "danielshabanian",
+    "SITE_URL": "https://danielsh.com"
+  },
+  // Secrets (wrangler secret put): GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
+  "kv_namespaces": [
+    { "binding": "OAUTH_KV", "id": "160fda74aacc4f6fbebcb259a1ccfc9a" },
+    { "binding": "SITE", "id": "4573c2d2c4364b1ba89c14362ed66578" }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "MCP_OBJECT", "class_name": "SiteMCP" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SiteMCP"] }],
+  "observability": { "enabled": true }
+}

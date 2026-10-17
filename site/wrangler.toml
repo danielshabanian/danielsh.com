@@ -1,0 +1,8 @@
+name = "danielsh"
+pages_build_output_dir = "public"
+compatibility_date = "2026-10-01"
+
+# Live content + media, written by the MCP server (../mcp).
+[[kv_namespaces]]
+binding = "SITE"
+id = "4573c2d2c4364b1ba89c14362ed66578"

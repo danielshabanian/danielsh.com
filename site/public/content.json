@@ -1,0 +1,103 @@
+{
+  "profile": {
+    "name": "Danial Shabanian",
+    "monogram": "ds",
+    "location": "Nottingham, UK",
+    "email": "",
+    "socials": [
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/d-shabanian-5a4499206/" }
+    ]
+  },
+  "seo": {
+    "title": "Danial Shabanian — Trustworthy autonomy for spinal surgery",
+    "description": "PhD researcher at Nottingham Trent University (MEDRG) building ScoliBot, a co-robotic system for spinal surgery with a trust-calibrated explanation layer."
+  },
+  "hero": {
+    "kicker": "PhD Researcher · Trustworthy autonomy for spinal surgery · MEDRG, Nottingham Trent University",
+    "headline": "Teaching surgical robots to *explain* themselves.",
+    "lede": "A mechanical engineer turned robotics researcher. I build ScoliBot, a co-robotic system for spinal surgery, and the trust-calibrated explanation layer that lets surgeons see why the robot acts, and when to step in.",
+    "hud": ["TARGET L2 · LOCKED", "TRUST · CALIBRATED"]
+  },
+  "marquee": ["Surgical robotics", "Explainable AI", "Human–robot trust", "LLM pipelines", "Co-robotics", "Supervision"],
+  "research": {
+    "nav": "Research",
+    "kicker": "Research & projects",
+    "title": "Robots a surgeon can *trust*, for the right reasons.",
+    "featured": {
+      "slug": "scolibot",
+      "tags": ["Flagship · PhD", "Surgical robotics", "Explainable AI"],
+      "title": "ScoliBot",
+      "body": "A co-robotic system for spinal surgery, built for precision, safety and better surgeon–robot interaction, with a trust-calibrated explanation and supervision layer. A formalised LLM explanation pipeline turns the robot's internal state into plain-language reasons, so the team's trust tracks how reliable the robot really is.",
+      "link": { "label": "Read the paper", "href": "#publications" },
+      "metrics": [
+        { "label": "SUS", "value": "", "note": "System usability" },
+        { "label": "NASA-TLX", "value": "", "note": "Surgeon workload" },
+        { "label": "Latency", "value": "", "note": "Explanation turnaround" },
+        { "label": "Faithfulness", "value": "", "note": "Explanation vs. reality" }
+      ]
+    },
+    "projects": [
+      { "slug": "llm-explanation-pipeline", "tag": "ScoliBot · Module", "title": "LLM explanation pipeline", "body": "A formalised pipeline that grounds every explanation in the robot's real state, with an ablation study on what each stage adds.", "stack": "Generative AI · Explainable AI · HRI" },
+      { "slug": "fdm-printer", "tag": "Hardware · AMB Lab", "title": "3D FDM printer, designed and built", "body": "As lab technician at the Advanced Material Behaviour Lab, led the design and construction of a fused-deposition 3D printer from scratch.", "stack": "Mechanical design · Team leadership" },
+      { "slug": "rotary-desk", "tag": "BSc project · Semnan", "title": "Precise rotary desk", "body": "Design, motion study and simulation of a precise rotary desk, supervised by Dr. Amin Nikoobin. Graded 19 / 20.", "stack": "SolidWorks · Motion study · Simulation" }
+    ]
+  },
+  "publications": {
+    "nav": "Publications",
+    "kicker": "Publications",
+    "title": "Writing it down.",
+    "items": [
+      { "year": "2026", "title": "ScoliBot: trust-calibrated explanation and supervision for surgical co-robotics", "authors": "D. Shabanian et al.", "venue": "Expert Systems With Applications (Elsevier)", "status": "In preparation", "pdf": "", "bibtex": "", "doi": "" }
+    ]
+  },
+  "path": {
+    "nav": "Path",
+    "kicker": "Path",
+    "title": "Experience & education.",
+    "skills": ["Surgical robotics", "Trustworthy autonomy", "Explainable AI", "Machine learning", "C++", "Linux", "Isaac ROS", "Isaac Sim", "Abaqus", "SolidWorks", "Gambit", "Modeling & simulation", "Usability studies (SUS, NASA-TLX)", "Interdisciplinary collaboration"],
+    "timeline": [
+      { "when": "Oct 2024 — Present", "role": "PhD Researcher, Robotics & AI", "org": "MEDRG · Nottingham Trent University", "body": "Developing trustworthy autonomous systems for spinal surgery: ScoliBot and its explanation and supervision layer." },
+      { "when": "Jun — Sep 2023", "role": "Apprentice", "org": "Mamut Asanbar · Gorgan, Iran", "body": "Hands-on assembly of elevator components on the factory floor." },
+      { "when": "2018 — 2023", "role": "BSc Mechanical Engineering", "org": "Semnan University", "body": "GPA 17.74 / 20 over the final two years and 19.48 / 20 in the final semester. Dissertation on robotics, control and motion (19 / 20)." },
+      { "when": "Jun — Sep 2022", "role": "Apprentice", "org": "Iran Dairy Industries Co. (Pegah) · Gorgan, Iran", "body": "Industrial apprenticeship, documented in a full technical report." },
+      { "when": "Feb — Jun 2022", "role": "Laboratory Technician", "org": "Advanced Material Behaviour Lab · Semnan, Iran", "body": "Led a team to design and build a 3D FDM printer." },
+      { "when": "Sep — Dec 2021", "role": "Instructor (freelance)", "org": "Remote", "body": "Taught Simwise 4D, a motion-simulation application." }
+    ]
+  },
+  "life": {
+    "nav": "Beyond the lab",
+    "kicker": "Beyond the lab",
+    "title": "The rest of the week.",
+    "items": [
+      { "title": "Training", "body": "Regular sessions in the gym: the same patient, measured progress I want from a robot." },
+      { "title": "Long conversations", "body": "Deep conversations over coffee. A good listener first, a good talker second." },
+      { "title": "Generative art", "body": "Playing with AI-assisted image tools on creative projects with friends." },
+      { "title": "Persian roots", "body": "Persian by heritage; Farsi is the language I think in when I'm not thinking in code." }
+    ]
+  },
+  "talks": {
+    "nav": "Talks",
+    "kicker": "Talks & learning",
+    "title": "On stage, and still studying.",
+    "featured": {
+      "slug": "nspine-keynote",
+      "kicker": "Keynote · NSpine 2025 · London",
+      "title": "Trust and autonomy in robot surgery",
+      "body": "Keynote lecture at NSpine, the annual spine conference at the Royal Horseguards Hotel, London, with 500+ attendees from around the world. Presented with the MEDRG team from NTU.",
+      "link": { "label": "", "href": "" }
+    },
+    "certs": [
+      { "name": "Introduction to Prompt Engineering for Generative AI", "org": "LinkedIn Learning", "year": "2026" },
+      { "name": "Getting Started: Simulating Your First Robot in Isaac Sim", "org": "NVIDIA", "year": "2025" },
+      { "name": "An Introduction to AI-Based Robot Development with Isaac ROS", "org": "NVIDIA", "year": "2025" },
+      { "name": "C++ for Robotics", "org": "The Construct", "year": "2025" },
+      { "name": "Linux for Robotics", "org": "The Construct", "year": "2025" },
+      { "name": "Brainwave 2025, certificate of attendance", "org": "Buckinghamshire Healthcare NHS Trust", "year": "2025" }
+    ]
+  },
+  "contact": {
+    "kicker": "Contact",
+    "headline": "Let's build robots|people can *trust*."
+  },
+  "media": {}
+}

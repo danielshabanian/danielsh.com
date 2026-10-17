@@ -1,0 +1,1 @@
+﻿Put images here (e.g. scolibot.jpg) and point a slot at them with the MCP set_media tool, or add to media in content.json: { "scolibot": { "src": "/media/scolibot.jpg", "alt": "..." } }. Slots: scolibot, project slugs, nspine-keynote, cv (PDF).
